@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div id="categories">
+        <ul>
+            <li id="1">Назменый транспорт</li>
+            <li id="2">Воздушный транспорт</li>
+        </ul>
+    </div>
+
+    <style>
+        li {
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        
+        $(document).ready(function (){
+            $('#categories li').click(function (){
+                var current_element = $(this);
+                console.log(current_element);
+                var parent_id = current_element.attr('id');
+                if (current_element.hasClass('opened')) {
+                    current_element.removeClass('opened');
+                    current_element.children('.children').remove();
+                }
+                else {get_categories(parent_id, current_element);}
+            });
+        });
+        
+        function get_categories(parent_id, displayed_element) {
+            $.ajax({
+            url: "categories.php",
+            type: 'get',
+            data: {parent_id: parent_id},
+            success: function(data) {
+                console.log(data);
+                if (data.length > 0) {
+                    var new_category = $("<ul></ul>").addClass('children');
+                    new_category.click(function(e) {e.stopPropagation();});
+                    displayed_element.append(new_category);
+                    display(data, new_category);
+                    displayed_element.addClass('opened');
+                }
+            }
+        });
+        }
+
+        function display(data, new_category) {
+            data.forEach(function(category) {
+                var element = $("<li></li>").text(category.name).attr('id', category.category_id);
+                new_category.append(element);
+                element.click(function() {
+                    get_categories(element.attr('id'), element);
+                });
+            }); 
+        }
+    </script>
+</body>
+</html>
